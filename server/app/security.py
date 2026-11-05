@@ -1,4 +1,5 @@
 """Authentication, provider signing and encrypted agency secrets."""
+import base64
 import hashlib
 import os
 import secrets
@@ -24,7 +25,12 @@ def crypt():
     key = os.environ.get("STRATA_ENCRYPTION_KEY")
     if not key:
         raise HTTPException(503, "Encryption key is not configured")
-    return Fernet(key.encode())
+    try:
+        return Fernet(key.encode())
+    except ValueError:
+        # Render-generated secret values are random strings, not Fernet-formatted keys.
+        # Derive a stable 32-byte key without persisting anything outside Render.
+        return Fernet(base64.urlsafe_b64encode(hashlib.sha256(key.encode()).digest()))
 
 
 def get_auth(request: Request):
