@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: iamstrata-crm-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      - key: STRATA_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: STRATA_ADMIN_EMAIL
+        sync: false
+      - key: STRATA_ADMIN_PASSWORD
+        sync: false
+      - key: STRATA_ENCRYPTION_KEY
+        sync: false
+      - key: STRATA_PUBLIC_URL
+        sync: false
+      - key: STRATA_VOICE_BRIDGE_SECRET
+        sync: false
+      - key: STRATA_MESSAGING_APPROVED
+        value: 'false'
+      - key: OPENAI_API_KEY
+        sync: false
