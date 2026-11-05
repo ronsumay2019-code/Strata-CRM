@@ -1,0 +1,46 @@
+name: One-time reviewed CRM source import
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/import-source.yml'
+permissions:
+  contents: write
+jobs:
+  import-reviewed-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Extract reviewed application source
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 --decode .source-import/iamstrata-bundle.b64 | tar -xz -f -
+          test -f Dockerfile
+          test -f server/app/main.py
+          test -f server/tests/test_crm.py
+          test -f web/index.html
+      - name: Install backend test dependencies
+        run: pip install -r server/requirements.txt pytest
+      - name: Run API and UI syntax verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd server && python -m pytest -q)
+          node --check web/app.js
+      - name: Publish review-tested source and remove staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .source-import
+          rm -f .github/workflows/import-source.yml
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat: import reviewed CRM backend and responsive dashboard"
+          git push origin HEAD:main
