@@ -1,25 +1,27 @@
+# Free IAmStrata CRM testing deployment. No paid service or worker is declared.
+# Uses the existing free PostgreSQL resource; does not create another database.
 services:
   - type: web
     name: iamstrata-crm-api
     runtime: docker
+    plan: free
+    region: oregon
     dockerfilePath: ./Dockerfile
     healthCheckPath: /healthz
     envVars:
       - key: STRATA_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: iamstrata-crm-dev-db
+          property: connectionString
       - key: STRATA_ADMIN_EMAIL
-        sync: false
+        value: ronsumay2019@gmail.com
       - key: STRATA_ADMIN_PASSWORD
-        sync: false
+        generateValue: true
       - key: STRATA_ENCRYPTION_KEY
-        sync: false
-      - key: STRATA_PUBLIC_URL
-        sync: false
+        generateValue: true
       - key: STRATA_VOICE_BRIDGE_SECRET
-        sync: false
+        generateValue: true
       - key: STRATA_MESSAGING_APPROVED
         value: 'false'
-      - key: OPENAI_API_KEY
-        sync: false
