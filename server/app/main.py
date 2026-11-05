@@ -38,7 +38,8 @@ def on_startup():
             raise RuntimeError("Production requires a PostgreSQL DATABASE_URL")
         if not os.getenv("STRATA_ENCRYPTION_KEY"):
             raise RuntimeError("Missing STRATA_ENCRYPTION_KEY")
-        if not os.getenv("STRATA_PUBLIC_URL", "").startswith("https://"):
+        public_base = os.getenv("STRATA_PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL", "")
+        if not public_base.startswith("https://"):
             raise RuntimeError("Missing secure public URL")
     initialize()
     if os.getenv("STRATA_ENV") == "production":
@@ -410,7 +411,7 @@ def ai_draft(agency_id: str, body: SendBody, auth=Depends(get_auth)):
 
 
 def public_webhook_url(path):
-    base = os.getenv("STRATA_PUBLIC_URL", "").rstrip("/")
+    base = (os.getenv("STRATA_PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL", "")).rstrip("/")
     if not base.startswith("https://"):
         raise HTTPException(503, "Set STRATA_PUBLIC_URL to the public HTTPS domain")
     return base + path
